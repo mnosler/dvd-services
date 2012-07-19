@@ -72,11 +72,12 @@ public class ServiceTester {
 	
 	private static JSONObject getImdbInfo(String dvdName) throws Exception
 	{
-		dvdName = dvdName.substring(0, dvdName.indexOf("(")-1);
-		dvdName = URLEncoder.encode(dvdName, "UTF-8");
-		dvdName = dvdName.trim();
-		URL dvdURL = new URL("http://www.imdbapi.com/?i=&t=" + dvdName);
+		if(dvdName.contains("("))
+			dvdName = dvdName.substring(0, dvdName.indexOf("("));
 		
+		dvdName = URLEncoder.encode(dvdName, "UTF-8");
+		URL dvdURL = new URL("http://www.imdbapi.com/?i=&t=" + dvdName);
+		System.out.println(dvdURL.toString());
 		//URL dvdURL = new URL("http://www.imdb.com/xml/find?json=1&nr=1&tt=on&q=" + dvdName);
 		URLConnection upcCon = dvdURL.openConnection();
 		

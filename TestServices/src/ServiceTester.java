@@ -15,7 +15,8 @@ public class ServiceTester {
 		//String upc = "786936807370";
 		Properties prop = new Properties();
 		prop.load(new FileInputStream("token.properties"));
-		String access_token = prop.getProperty("access_token");
+		String access_token = prop.getProperty("upc_token");
+		String tomato_token = prop.getProperty("tomato_token");
 		
 		ArrayList<String> upcList = new ArrayList<String>();
 		
@@ -31,14 +32,14 @@ public class ServiceTester {
 		{
 		String dvdName = getDvdName(upc, access_token);
 		
-		JSONObject imdbInfo = getImdbInfo(dvdName);
+		JSONObject imdbInfo = getImdbInfo(dvdName, tomato_token);
 	    
 		StringBuilder output = new StringBuilder();
-	    System.out.println(imdbInfo.names());
-	    
-	    output.append("Title: " + imdbInfo.getString("Title") + "\n");
-	    output.append("Rated: " + imdbInfo.getString("Rated") + "\n");
-	    output.append("Runtime: " + imdbInfo.getString("Runtime") + "\n");
+	    System.out.println(imdbInfo.getJSONArray("movies").getJSONObject(0).getString("title"));
+	    imdbInfo = imdbInfo.getJSONArray("movies").getJSONObject(0);
+	    output.append("Title: " + imdbInfo.getString("title") + "\n");
+	    output.append("Rated: " + imdbInfo.getString("mpaa_rating") + "\n");
+	    output.append("Runtime: " + imdbInfo.getString("runtime") + "\n");
 	    
 	    System.out.println(output.toString());
 	    
@@ -63,6 +64,7 @@ public class ServiceTester {
 	    in.close();
 
 	    JSONObject upcResponse = new JSONObject(builder.toString());
+	    System.out.println(upcResponse);
 	    System.out.println(upcResponse.getJSONObject("0").getString("productname"));
 	    
 	    String dvdName = upcResponse.getJSONObject("0").getString("productname");
@@ -70,13 +72,20 @@ public class ServiceTester {
 	    
 	}
 	
-	private static JSONObject getImdbInfo(String dvdName) throws Exception
+	private static JSONObject getImdbInfo(String dvdName, String tomato_token) throws Exception
 	{
+		dvdName = dvdName.toLowerCase();
+		System.out.println(dvdName);
 		if(dvdName.contains("("))
 			dvdName = dvdName.substring(0, dvdName.indexOf("("));
-		
+		System.out.println(dvdName);
+		if(dvdName.contains("collector"))
+			dvdName = dvdName.substring(0, dvdName.indexOf("collector"));
+			
 		dvdName = URLEncoder.encode(dvdName, "UTF-8");
-		URL dvdURL = new URL("http://www.imdbapi.com/?i=&t=" + dvdName);
+		//URL dvdURL = new URL("http://www.imdbapi.com/?i=&t=" + dvdName);
+		URL dvdURL = new URL("http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=" +
+							tomato_token +"&q="+dvdName+"&page_limit=1");
 		System.out.println(dvdURL.toString());
 		//URL dvdURL = new URL("http://www.imdb.com/xml/find?json=1&nr=1&tt=on&q=" + dvdName);
 		URLConnection upcCon = dvdURL.openConnection();
